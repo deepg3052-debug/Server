@@ -2,10 +2,18 @@ const express = require('express');
 
 const router = express.Router();
 
-const { protect } = require('../middleware/authMiddleware');
+/* ====================================
+   IMPORT MIDDLEWARE
+==================================== */
+
+const {
+
+    protect
+
+} = require('../middleware/authMiddleware');
 
 /* ====================================
-   IMPORT CONTROLLER
+   IMPORT CONTROLLERS
 ==================================== */
 
 const {
@@ -24,25 +32,59 @@ const {
    GET ALL TRAINERS
 ==================================== */
 
-router.get('/', getTrainers);
+// PUBLIC ROUTE
+
+router.get(
+
+    '/',
+
+    getTrainers
+
+);
 
 /* ====================================
    ADD TRAINER
 ==================================== */
 
-router.post('/', protect, createTrainer);
+// PROTECTED ROUTE
+
+router.post(
+
+    '/',
+
+    protect,
+
+    createTrainer
+
+);
 
 /* ====================================
    UPDATE TRAINER
 ==================================== */
 
-router.put('/:id', protect, updateTrainer);
+router.put(
+
+    '/:id',
+
+    protect,
+
+    updateTrainer
+
+);
 
 /* ====================================
    DELETE TRAINER
 ==================================== */
 
-router.delete('/:id', protect, deleteTrainer);
+router.delete(
+
+    '/:id',
+
+    protect,
+
+    deleteTrainer
+
+);
 
 /* ====================================
    EXPORT ROUTER
