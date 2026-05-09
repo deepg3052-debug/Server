@@ -45,6 +45,12 @@ const membershipRequestRoutes =
     require(
         './routes/membershipRequestRoutes'
     );
+const cors = require("cors");
+
+app.use(cors({
+    origin: "https://sprightly-clafoutis-111086.netlify.app",
+    credentials: true
+}));
 
 /* ====================================
    IMPORT ERROR MIDDLEWARE
