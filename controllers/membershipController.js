@@ -1,7 +1,7 @@
 const Membership = require('../models/Membership');
 
 /* ====================================
-   GET MEMBERSHIPS
+   GET ALL MEMBERSHIPS
 ==================================== */
 
 const getMemberships = async (req, res) => {
@@ -14,11 +14,15 @@ const getMemberships = async (req, res) => {
 
             success: true,
 
+            count: memberships.length,
+
             data: memberships
 
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -40,19 +44,67 @@ const createMembership = async (req, res) => {
 
     try {
 
-        const membership = await Membership.create(req.body);
+        const {
+
+            name,
+
+            price,
+
+            duration,
+
+            features
+
+        } = req.body;
+
+        // VALIDATION
+
+        if (
+
+            !name ||
+
+            !price ||
+
+            !duration
+
+        ) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: 'Please fill all required fields'
+
+            });
+
+        }
+
+        // CREATE MEMBERSHIP
+
+        const membership = await Membership.create({
+
+            name,
+
+            price,
+
+            duration,
+
+            features
+
+        });
 
         res.status(201).json({
 
             success: true,
 
-            message: 'Membership Added',
+            message: 'Membership Added Successfully',
 
             data: membership
 
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -74,27 +126,58 @@ const updateMembership = async (req, res) => {
 
     try {
 
-        const membership = await Membership.findByIdAndUpdate(
+        const membership = await Membership.findById(
 
-            req.params.id,
-
-            req.body,
-
-            { new: true }
+            req.params.id
 
         );
+
+        // CHECK MEMBERSHIP
+
+        if (!membership) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: 'Membership Not Found'
+
+            });
+
+        }
+
+        // UPDATE MEMBERSHIP
+
+        const updatedMembership =
+            await Membership.findByIdAndUpdate(
+
+                req.params.id,
+
+                req.body,
+
+                {
+
+                    new: true,
+
+                    runValidators: true
+
+                }
+
+            );
 
         res.status(200).json({
 
             success: true,
 
-            message: 'Membership Updated',
+            message: 'Membership Updated Successfully',
 
-            data: membership
+            data: updatedMembership
 
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -116,17 +199,45 @@ const deleteMembership = async (req, res) => {
 
     try {
 
-        await Membership.findByIdAndDelete(req.params.id);
+        const membership = await Membership.findById(
+
+            req.params.id
+
+        );
+
+        // CHECK MEMBERSHIP
+
+        if (!membership) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: 'Membership Not Found'
+
+            });
+
+        }
+
+        // DELETE MEMBERSHIP
+
+        await Membership.findByIdAndDelete(
+
+            req.params.id
+
+        );
 
         res.status(200).json({
 
             success: true,
 
-            message: 'Membership Deleted'
+            message: 'Membership Deleted Successfully'
 
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -141,7 +252,7 @@ const deleteMembership = async (req, res) => {
 };
 
 /* ====================================
-   EXPORT CONTROLLER
+   EXPORT CONTROLLERS
 ==================================== */
 
 module.exports = {
