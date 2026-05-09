@@ -1,10 +1,8 @@
-const MembershipRequest =
-    require(
-        '../models/MembershipRequest'
-    );
+const MembershipRequest = require(
+    '../models/MembershipRequest'
+);
 
-const User =
-    require('../models/User');
+const User = require('../models/User');
 
 /* ====================================
    CREATE MEMBERSHIP REQUEST
@@ -29,9 +27,52 @@ const createMembershipRequest =
 
             } = req.body;
 
-            // ====================================
+            // VALIDATION
+
+            if (
+
+                !userId ||
+
+                !userName ||
+
+                !email ||
+
+                !plan ||
+
+                !price
+
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Please fill all required fields'
+
+                });
+
+            }
+
+            // CHECK EXISTING USER
+
+            const user =
+                await User.findById(userId);
+
+            if (!user) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        'User not found'
+
+                });
+
+            }
+
             // CHECK EXISTING PENDING REQUEST
-            // ====================================
 
             const existingRequest =
                 await MembershipRequest.findOne({
@@ -55,9 +96,7 @@ const createMembershipRequest =
 
             }
 
-            // ====================================
             // CREATE REQUEST
-            // ====================================
 
             const request =
                 await MembershipRequest.create({
@@ -70,7 +109,9 @@ const createMembershipRequest =
 
                     plan,
 
-                    price
+                    price,
+
+                    status: 'pending'
 
                 });
 
@@ -87,6 +128,8 @@ const createMembershipRequest =
 
         } catch (error) {
 
+            console.log(error);
+
             res.status(500).json({
 
                 success: false,
@@ -100,7 +143,7 @@ const createMembershipRequest =
     };
 
 /* ====================================
-   GET ALL REQUESTS
+   GET ALL MEMBERSHIP REQUESTS
 ==================================== */
 
 const getMembershipRequests =
@@ -121,11 +164,15 @@ const getMembershipRequests =
 
                 success: true,
 
+                count: requests.length,
+
                 data: requests
 
             });
 
         } catch (error) {
+
+            console.log(error);
 
             res.status(500).json({
 
@@ -151,9 +198,7 @@ const approveMembershipRequest =
             const { paymentConfirmed } =
                 req.body;
 
-            // ====================================
             // FIND REQUEST
-            // ====================================
 
             const request =
                 await MembershipRequest.findById(
@@ -175,15 +220,10 @@ const approveMembershipRequest =
 
             }
 
-            // ====================================
             // ALREADY APPROVED
-            // ====================================
 
             if (
-
-                request.status ===
-                'approved'
-
+                request.status === 'approved'
             ) {
 
                 return res.status(400).json({
@@ -197,9 +237,7 @@ const approveMembershipRequest =
 
             }
 
-            // ====================================
-            // PAYMENT NOT CONFIRMED
-            // ====================================
+            // PAYMENT VALIDATION
 
             if (!paymentConfirmed) {
 
@@ -208,30 +246,24 @@ const approveMembershipRequest =
                     success: false,
 
                     message:
-                        'Payment must be confirmed to approve'
+                        'Payment confirmation required'
 
                 });
 
             }
 
-            // ====================================
-            // UPDATE REQUEST STATUS
-            // ====================================
+            // UPDATE REQUEST
 
-            request.status =
-                'approved';
+            request.status = 'approved';
+
+            request.paymentConfirmed = true;
 
             request.approvedAt =
                 new Date();
 
-            request.paymentConfirmed =
-                true;
-
             await request.save();
 
-            // ====================================
             // UPDATE USER MEMBERSHIP
-            // ====================================
 
             const updatedUser =
                 await User.findByIdAndUpdate(
@@ -243,8 +275,7 @@ const approveMembershipRequest =
                         membership:
                             request.plan,
 
-                        status:
-                            'active'
+                        status: 'active'
 
                     },
 
@@ -261,13 +292,15 @@ const approveMembershipRequest =
                 success: true,
 
                 message:
-                    `${updatedUser.firstName}'s membership upgraded to ${request.plan}`,
+                    `${updatedUser.firstName}'s membership upgraded successfully`,
 
                 data: updatedUser
 
             });
 
         } catch (error) {
+
+            console.log(error);
 
             res.status(500).json({
 
@@ -292,9 +325,7 @@ const rejectMembershipRequest =
 
             const { reason } = req.body;
 
-            // ====================================
             // FIND REQUEST
-            // ====================================
 
             const request =
                 await MembershipRequest.findById(
@@ -316,15 +347,10 @@ const rejectMembershipRequest =
 
             }
 
-            // ====================================
-            // ALREADY APPROVED
-            // ====================================
+            // CHECK STATUS
 
             if (
-
-                request.status ===
-                'approved'
-
+                request.status === 'approved'
             ) {
 
                 return res.status(400).json({
@@ -332,18 +358,15 @@ const rejectMembershipRequest =
                     success: false,
 
                     message:
-                        'Cannot reject an approved request'
+                        'Approved request cannot be rejected'
 
                 });
 
             }
 
-            // ====================================
-            // UPDATE REQUEST STATUS
-            // ====================================
+            // UPDATE REQUEST
 
-            request.status =
-                'rejected';
+            request.status = 'rejected';
 
             request.rejectionReason =
                 reason || 'No reason provided';
@@ -358,13 +381,15 @@ const rejectMembershipRequest =
                 success: true,
 
                 message:
-                    'Membership request rejected',
+                    'Membership request rejected successfully',
 
                 data: request
 
             });
 
         } catch (error) {
+
+            console.log(error);
 
             res.status(500).json({
 
@@ -387,11 +412,10 @@ const getUserMembership =
 
         try {
 
-            const { userId } = req.params;
+            const userId =
+                req.params.id;
 
-            // ====================================
-            // FIND APPROVED MEMBERSHIP
-            // ====================================
+            // FIND MEMBERSHIP
 
             const membership =
                 await MembershipRequest.findOne({
@@ -408,11 +432,12 @@ const getUserMembership =
 
             if (!membership) {
 
-                return res.status(200).json({
+                return res.status(404).json({
 
                     success: false,
 
-                    data: null
+                    message:
+                        'No active membership found'
 
                 });
 
@@ -428,6 +453,8 @@ const getUserMembership =
 
         } catch (error) {
 
+            console.log(error);
+
             res.status(500).json({
 
                 success: false,
@@ -441,7 +468,7 @@ const getUserMembership =
     };
 
 /* ====================================
-   EXPORT
+   EXPORT CONTROLLERS
 ==================================== */
 
 module.exports = {
