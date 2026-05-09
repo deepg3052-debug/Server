@@ -5,10 +5,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 /* ====================================
-   GENERATE JWT
+   GENERATE JWT TOKEN
 ==================================== */
 
 const generateToken = (id) => {
+
+    // CHECK JWT SECRET
+
+    if (!process.env.JWT_SECRET) {
+
+        throw new Error('JWT_SECRET Missing');
+
+    }
 
     return jwt.sign(
 
@@ -52,6 +60,36 @@ const registerUser = async (req, res) => {
 
         } = req.body;
 
+        // VALIDATION
+
+        if (
+
+            !firstName ||
+
+            !lastName ||
+
+            !email ||
+
+            !phone ||
+
+            !age ||
+
+            !gender ||
+
+            !password
+
+        ) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: 'Please fill all fields'
+
+            });
+
+        }
+
         // CHECK EXISTING USER
 
         const existingUser = await User.findOne({
@@ -74,14 +112,15 @@ const registerUser = async (req, res) => {
 
         // HASH PASSWORD
 
-        const salt =
-            await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(10);
 
-        const hashedPassword =
-            await bcrypt.hash(
-                password,
-                salt
-            );
+        const hashedPassword = await bcrypt.hash(
+
+            password,
+
+            salt
+
+        );
 
         // CREATE USER
 
@@ -102,6 +141,8 @@ const registerUser = async (req, res) => {
             password: hashedPassword
 
         });
+
+        // RESPONSE
 
         res.status(201).json({
 
@@ -128,6 +169,8 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
 
@@ -157,6 +200,20 @@ const loginUser = async (req, res) => {
 
         } = req.body;
 
+        // VALIDATION
+
+        if (!email || !password) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: 'Please enter email and password'
+
+            });
+
+        }
+
         // FIND USER
 
         const user = await User.findOne({
@@ -179,14 +236,13 @@ const loginUser = async (req, res) => {
 
         // CHECK PASSWORD
 
-        const isMatch =
-            await bcrypt.compare(
+        const isMatch = await bcrypt.compare(
 
-                password,
+            password,
 
-                user.password
+            user.password
 
-            );
+        );
 
         if (!isMatch) {
 
@@ -200,7 +256,7 @@ const loginUser = async (req, res) => {
 
         }
 
-        // SUCCESS LOGIN
+        // SUCCESS RESPONSE
 
         res.status(200).json({
 
@@ -228,6 +284,8 @@ const loginUser = async (req, res) => {
 
     } catch (error) {
 
+        console.log(error);
+
         res.status(500).json({
 
             success: false,
@@ -241,7 +299,7 @@ const loginUser = async (req, res) => {
 };
 
 /* ====================================
-   EXPORT
+   EXPORT CONTROLLERS
 ==================================== */
 
 module.exports = {
