@@ -2,10 +2,18 @@ const express = require('express');
 
 const router = express.Router();
 
-const { protect } = require('../middleware/authMiddleware');
+/* ====================================
+   IMPORT MIDDLEWARE
+==================================== */
+
+const {
+
+    protect
+
+} = require('../middleware/authMiddleware');
 
 /* ====================================
-   IMPORT CONTROLLER
+   IMPORT CONTROLLERS
 ==================================== */
 
 const {
@@ -24,25 +32,59 @@ const {
    GET ALL USERS
 ==================================== */
 
-router.get('/', getUsers);
+// PROTECTED ROUTE
+
+router.get(
+
+    '/',
+
+    protect,
+
+    getUsers
+
+);
 
 /* ====================================
    GET USER BY ID
 ==================================== */
 
-router.get('/:id', protect, getUserById);
+router.get(
+
+    '/:id',
+
+    protect,
+
+    getUserById
+
+);
 
 /* ====================================
    UPDATE USER
 ==================================== */
 
-router.put('/:id', protect, updateUser);
+router.put(
+
+    '/:id',
+
+    protect,
+
+    updateUser
+
+);
 
 /* ====================================
    DELETE USER
 ==================================== */
 
-router.delete('/:id', deleteUser);
+router.delete(
+
+    '/:id',
+
+    protect,
+
+    deleteUser
+
+);
 
 /* ====================================
    EXPORT ROUTER
