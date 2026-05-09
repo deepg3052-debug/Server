@@ -2,10 +2,18 @@ const express = require('express');
 
 const router = express.Router();
 
-const { protect } = require('../middleware/authMiddleware');
+/* ====================================
+   IMPORT MIDDLEWARE
+==================================== */
+
+const {
+
+    protect
+
+} = require('../middleware/authMiddleware');
 
 /* ====================================
-   IMPORT CONTROLLER
+   IMPORT CONTROLLERS
 ==================================== */
 
 const {
@@ -27,34 +35,78 @@ const {
 } = require('../controllers/membershipRequestController');
 
 /* ====================================
-   GET MEMBERSHIPS
+   GET ALL MEMBERSHIPS
 ==================================== */
 
-router.get('/', getMemberships);
+// PUBLIC ROUTE
+
+router.get(
+
+    '/',
+
+    getMemberships
+
+);
 
 /* ====================================
    GET USER MEMBERSHIP
 ==================================== */
 
-router.get('/user/:id', protect, getUserMembership);
+// PROTECTED ROUTE
+
+router.get(
+
+    '/user/:id',
+
+    protect,
+
+    getUserMembership
+
+);
 
 /* ====================================
    CREATE MEMBERSHIP
 ==================================== */
 
-router.post('/', protect, createMembership);
+// PROTECTED ROUTE
+
+router.post(
+
+    '/',
+
+    protect,
+
+    createMembership
+
+);
 
 /* ====================================
    UPDATE MEMBERSHIP
 ==================================== */
 
-router.put('/:id', protect, updateMembership);
+router.put(
+
+    '/:id',
+
+    protect,
+
+    updateMembership
+
+);
 
 /* ====================================
    DELETE MEMBERSHIP
 ==================================== */
 
-router.delete('/:id', protect, deleteMembership);
+router.delete(
+
+    '/:id',
+
+    protect,
+
+    deleteMembership
+
+);
 
 /* ====================================
    EXPORT ROUTER
