@@ -9,62 +9,37 @@ require('dotenv').config();
 ==================================== */
 
 const express = require('express');
-
 const cors = require('cors');
+const mongoose = require('mongoose');
 
 /* ====================================
    IMPORT DATABASE
 ==================================== */
 
-const connectDB =
-    require('./config/db');
+const connectDB = require('./config/db');
 
 /* ====================================
    IMPORT ROUTES
 ==================================== */
 
-const authRoutes =
-    require('./routes/authRoutes');
-
-const bookingRoutes =
-    require('./routes/bookingRoutes');
-
-const membershipRoutes =
-    require('./routes/membershipRoutes');
-
-const paymentRoutes =
-    require('./routes/paymentRoutes');
-
-const trainerRoutes =
-    require('./routes/trainerRoutes');
-
-const userRoutes =
-    require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const membershipRoutes = require('./routes/membershipRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const trainerRoutes = require('./routes/trainerRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const membershipRequestRoutes =
-    require(
-        './routes/membershipRequestRoutes'
-    );
-const cors = require("cors");
-
-app.use(cors({
-    origin: "https://sprightly-clafoutis-111086.netlify.app",
-    credentials: true
-}));
+    require('./routes/membershipRequestRoutes');
 
 /* ====================================
    IMPORT ERROR MIDDLEWARE
 ==================================== */
 
 const {
-
     notFound,
-
     errorHandler
-
-} = require(
-    './middleware/errorMiddleware'
-);
+} = require('./middleware/errorMiddleware');
 
 /* ====================================
    INITIALIZE EXPRESS APP
@@ -79,16 +54,36 @@ const app = express();
 connectDB();
 
 /* ====================================
+   CHECK ENV VARIABLES
+==================================== */
+
+if (!process.env.JWT_SECRET) {
+    console.log('JWT_SECRET Missing');
+}
+
+if (!process.env.MONGO_URI) {
+    console.log('MONGO_URI Missing');
+}
+
+/* ====================================
    MIDDLEWARE
 ==================================== */
 
 // ENABLE CORS
 
-app.use(cors());
+app.use(cors({
+
+    origin: 'https://sprightly-clafoutis-111086.netlify.app',
+
+    credentials: true
+
+}));
 
 // PARSE JSON DATA
 
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
 
 /* ====================================
    ROOT ROUTE
@@ -96,9 +91,7 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
 
-    res.send(
-        'POWERFIT GYM SERVER RUNNING'
-    );
+    res.send('POWERFIT GYM SERVER RUNNING');
 
 });
 
@@ -112,8 +105,7 @@ app.get('/api/test', (req, res) => {
 
         success: true,
 
-        message:
-            'Backend API Working Successfully'
+        message: 'Backend API Working Successfully'
 
     });
 
@@ -125,54 +117,33 @@ app.get('/api/test', (req, res) => {
 
 // AUTH ROUTES
 
-app.use(
-    '/api/auth',
-    authRoutes
-);
+app.use('/api/auth', authRoutes);
 
 // USER ROUTES
 
-app.use(
-    '/api/users',
-    userRoutes
-);
+app.use('/api/users', userRoutes);
 
 // BOOKING ROUTES
 
-app.use(
-    '/api/bookings',
-    bookingRoutes
-);
+app.use('/api/bookings', bookingRoutes);
 
 // MEMBERSHIP ROUTES
 
-app.use(
-    '/api/memberships',
-    membershipRoutes
-);
+app.use('/api/memberships', membershipRoutes);
 
 // PAYMENT ROUTES
 
-app.use(
-    '/api/payments',
-    paymentRoutes
-);
+app.use('/api/payments', paymentRoutes);
 
 // TRAINER ROUTES
 
-app.use(
-    '/api/trainers',
-    trainerRoutes
-);
+app.use('/api/trainers', trainerRoutes);
 
 // MEMBERSHIP REQUEST ROUTES
 
 app.use(
-
     '/api/membership-requests',
-
     membershipRequestRoutes
-
 );
 
 /* ====================================
@@ -191,8 +162,7 @@ app.use(errorHandler);
    PORT
 ==================================== */
 
-const PORT =
-    process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 /* ====================================
    START SERVER
@@ -200,10 +170,6 @@ const PORT =
 
 app.listen(PORT, () => {
 
-    console.log(
-
-        `Server running on port ${PORT}`
-
-    );
+    console.log(`Server running on port ${PORT}`);
 
 });
